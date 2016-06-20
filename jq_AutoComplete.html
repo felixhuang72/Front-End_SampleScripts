@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Auto Complete</title>
+    <style>
+    div.AutoComplete,
+    span.AutoComplete {
+        display: block;
+        position: relative;
+    }
+    
+    div.AutoComplete div.AC_Content,
+    span.AutoComplete div.AC_Content {
+        top: 30px;
+        left: 0;
+        width: 180px;
+        min-height: 100px;
+        max-height: 250px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: #ECECEC;
+        padding: 0;
+        box-shadow: #999 0px 0px 8px;
+        -moz-box-shadow: #999 0px 0px 8px;
+        -webkit-box-shadow: #999 0px 0px 8px;
+        -ms-box-shadow: #999 0px 0px 8px;
+        -o-box-shadow: #999 0px 0px 8px;
+    }
+    
+    div.AutoComplete div.AC_Content,
+    span.AutoComplete div.AC_Content li {
+        display: block;
+        padding: 5px 10px;
+        background: #FFF;
+        margin-bottom: 1px;
+    }
+    
+    span.AutoComplete div.AC_Content li.m_over {
+        background: #FC0;
+    }
+    </style>
+    <script type="text/javascript">
+    $(function() {
+
+        var obj = $('input.AutoComplete');
+        var $obj_container = obj.parent();
+
+        //將 textbox 移動到新建立的 'span.AutoComplte' element 內
+        var $ac_span = $(document.createElement('span')).attr('class', 'AutoComplete').appendTo($obj_container);
+        obj.appendTo($ac_span);
+
+        //存放當前的關鍵字 (此値用來判斷新舊關鍵字是否相同，若不同，才進行搜尋)
+        $('<input>').attr({
+            type: 'hidden',
+            id: obj.attr('id') + '_key',
+            class: 'current_value'
+        }).appendTo($ac_span);
+
+        //點選網頁任何一處後，移除 Auto-Complete 的區塊內容
+        $('html').not('div.AC_Content').click(function() {
+            $('div.AC_Content').remove();
+            $('.current_value').val('');
+        })
+    });
+
+
+    //input 的 keyup 事件       
+    function getData(obj, e) {
+
+        //當前關鍵字
+        var current_key = $('#' + obj.getAttribute('id')).siblings('input.current_value');
+
+        //取得資料來源
+        var get_source = function() {
+
+            $('div.AC_Content').remove();
+
+            //Create auto-complete content panel
+            var ac_span = $('span.AutoComplete');
+            var $ac_content_panel = $(document.createElement('div')).attr('class', 'AC_Content').appendTo(ac_span);
+
+            //Create Content
+            var result = ['aaaa', 'bbbb', 'cccc', 'ddd', 'eee'];
+            for (i = 0; i < result.length; i++) {
+                $('<li onclick="showData(\'' + result[i] + '\')">' + result[i] + '</li>').hover(
+                    function() {
+                        $('div.AC_Content li').removeClass('m_over');
+                        $(this).addClass('m_over');
+                    },
+                    function() {
+                        $('div.AC_Content li').removeClass('m_over');
+                    }).appendTo($ac_content_panel);
+            }
+        }
+
+
+        //點選 ESC 或 TAB 鍵時，隱藏內容面板
+        if (e.keyCode == '9' || e.keyCode == '27') {
+
+            //9: tab; 27: esc            
+            $('div.AC_Content').remove();
+            current_key.val('');
+        }
+        //由 "下鍵" 觸發 AutoComplete (自資料來源中取得即時資料)
+        //觸發條件:
+        // 1. 若點選非 "左鍵、上鍵、右鍵及 Enter" 按鍵時
+        // 2. 若內容面板不存在的情況下點選 "下鍵"，或
+        // 3. 面版存在情況下，點選非 "下鍵" 按鈕
+        else if (
+            e.keyCode != '37' && e.keyCode != '38' && e.keyCode != '39' /*&& e.keyCode != '40'*/ && e.keyCode != '13' &&
+            (($('div.AC_Content').length == 0 && e.keyCode == '40') || ($('div.AC_Content').length != 0 && e.keyCode != '40'))
+        ) {
+            //有關鍵字，且新舊關鍵字不同 => 取得新的資料來源
+            if (obj.value != '' && current_key.val() != obj.value && e.keyCode == '40') {
+                get_source();
+            }
+
+            //若點選 "下鍵"，更新記錄
+            if (e.keyCode == '40') {
+                current_key.val(obj.value);
+            }
+
+        } else {
+
+            if ($('div.AC_Content li').length > 0) {
+
+                var obj_list = $('div.AC_Content li');
+
+                //Down Arrow
+                if ($('div.AC_Content').length > 0 && e.keyCode == '40') {
+
+                    if (obj.value != current_key.val()) {
+                        get_source();
+                        current_key.val(obj.value);
+                    } else {
+                        if (obj_list.hasClass('m_over')) {
+                            var current_index = $('li.m_over').index();
+                            var next_index = current_index == obj_list.length - 1 ? 0 : $('li.m_over').index() + 1;
+                            obj_list.eq(current_index).removeClass('m_over');
+                            obj_list.eq(next_index).addClass('m_over');
+
+                        } else {
+                            obj_list.eq(0).addClass('m_over');
+                        }
+                    }
+                }
+
+                //Up Arrow
+                if ($('div.AC_Content').length > 0 && e.keyCode == '38') {
+                    if (obj_list.hasClass('m_over')) {
+                        var current_index = $('li.m_over').index();
+                        var next_index = current_index == 0 ? obj_list.length - 1 : $('li.m_over').index() - 1;
+                        obj_list.eq(current_index).removeClass('m_over');
+                        obj_list.eq(next_index).addClass('m_over');
+
+                    } else {
+                        obj_list.eq(0).addClass('m_over');
+                    }
+                }
+
+                //Enter
+                if ($('div.AC_Content').length > 0 && e.keyCode == '13') {
+                    $('li.m_over').click();
+                    current_key.val('');
+                }
+            }
+        }
+    }
+
+    function showData(val) {
+        alert(val);
+    }
+    </script>
+</head>
+
+<body>
+    <div>
+        <input type="text" id="m_rocid" class="AutoComplete" value="abc" onkeypress="getData(this, event)" />
+    </div>
+    <input type="text" />
+</body>
+
+</html>

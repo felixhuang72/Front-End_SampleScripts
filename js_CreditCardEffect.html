@@ -1,0 +1,191 @@
+<html>
+
+<head>
+    <title>Credit Card textboxs Effect</title>
+    <script src="https://code.jquery.com/jquery-1.11.3.js" /></script>
+    <script src="./Script/jquery.creditCardValidator.js" /></script>
+    <script type="text/javascript">
+    
+    function jq_ValidateCreditCard(triggerObj, objs_id_array) {
+    	/// <summary>驗證信用卡卡號</summary>
+        /// <param name="triggerObj">信用卡卡號對應 keyup 事件的輸入欄位ID</param>
+        /// <param name="objs_id_array">若為四個分開的輸入欄位，需將目前所有的輸入欄位 ID 値放至於 Array 中；若僅有單一輸入欄位，不必指定本參數</param>
+        //詳細用法，參閱: http://jquerycreditcardvalidator.com/
+
+        var obj_msg = document.getElementById('msg');
+
+        //declare trigger object
+        var obj = typeof triggerObj === 'string' ? $('#' + triggerObj.replace('#', '')) : (typeof triggerObj === 'object' ? triggerObj : null);;
+        
+        //get card number
+        var val = '';
+        //若為四個分開的輸入欄位，將目前的輸入狀態値組合起來
+        if (typeof objs_id_array != 'undefined') {
+            for (i = 0; i < objs_id_array.length; i++) {
+                val += $('#' + objs_id_array[i].replace('#', '')).val().trim();
+            }
+            obj.val(val);
+        }
+
+        obj.validateCreditCard(
+            function(result) {
+                obj_msg.innerHTML = 'Card type: ' + result.card_type.name + '<br />Valid result: ' + result.valid + '<br />length_valid: ' + result.length_valid + '<br />luhn_valid: ' + result.luhn_valid;
+            }
+        );
+    }
+
+    function moveCursorPosition(objId, position) {
+        /// <summary>指定滑鼠停留位置</summary>
+        /// <param name="objId">主控制物件本體</param>
+        /// <param name="position">指定的位置 (未指定，將設定為開頭)</param>
+
+        var obj = document.getElementById(objId);
+        obj.focus();
+        position = typeof position === 'undefined' || isNaN(position) ? 0 : position;
+
+        if (document.selection) {
+            var sel = obj.createTextRange();
+            sel.moveStart('character', position);
+            sel.collapse();
+            sel.select();
+        } else if (typeof obj.selectionStart == 'number' && typeof obj.selectionEnd == 'number') {
+            obj.selectionStart = obj.selectionEnd = position;
+        }
+    }
+
+    function inputRestrict(e, extra_str) {
+        /// <summary>限制輸入的字元</summary>
+        /// <param name="e">事件</param>
+        /// <param name="extra_str">字串: 允許的字元清單</param>
+
+        if (typeof extra_str !== 'string') {
+            return true;
+        } else {
+            var base_char_array = new Array();
+            extra_str = extra_str.trim();
+
+            for (i = 0; i < extra_str.length; i++) {
+                var j = i + 1;
+                var c = extra_str.substring(i, j);
+                if (c.trim() != '') {
+                    base_char_array.push(c);
+                }
+            }
+            // MSIE hack
+            if (window.event) {
+                e = window.event;
+            }
+            //Back: 8, Tab: 9, Shift: 16; <-: 37, ->:39, Del: 46, Home: 36, End: 35
+            return base_char_array.indexOf(String.fromCharCode(e.charCode)) != -1 || e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 35 || e.keyCode == 36 || e.keyCode == 46 || (e.shiftKey && e.keyCode == 9) || (e.shiftKey && e.keyCode == 35) || (e.shiftKey && e.keyCode == 36);
+        }
+
+    }
+
+    function inputNumberOnly(e, extra_str) {
+        /// <summary>限制僅能輸入數字</summary>
+        /// <param name="e">事件</param>
+        /// <param name="extra_str">字串: 額外擴充的允許字元</param>
+
+        var base_char = '0123456789';
+        base_char = typeof extra_str === 'string' ? base_char + extra_str.trim() : base_char;
+        return inputRestrict(e, base_char);
+    }
+
+    function moveCreditCardTextbox(obj, e, targetObj) {
+        /// <summary>信用卡欄位填寫過程中，當該欄位字元填滿後，自動移動至下一個數字群組欄位</summary>
+        /// <param name="obj">目前填寫的欄位物件</param>
+        /// <param name="e">事件</param>
+        /// <param name="targetObj">動作對應屬性 (屬性: nextObjId: 下一個欄位ID; prevObjId: 上一個欄位ID) </param>
+
+        // MSIE hack
+        if (window.event) {
+            e = window.event;
+        }
+        var keyCode = (96 <= e.keyCode && e.keyCode <= 105) ? e.keyCode - 48 : e.keyCode; //0-9
+
+        var objMaxlength = obj.getAttribute('maxlength') == null || obj.getAttribute('maxlength') == '' ? null : obj.getAttribute('maxlength');
+        var p_nextObjId = targetObj.nextObjId === 'undefined' ? '' : targetObj.nextObjId;
+        var p_prevObjId = targetObj.prevObjId === 'undefined' ? '' : targetObj.prevObjId;
+        var o_nextObj = document.getElementById(p_nextObjId);
+        var o_prevObj = document.getElementById(p_prevObjId);
+
+
+        //move to NEXT (input number only)
+        if ((keyCode >= 48 && keyCode <= 57)) {
+            if (objMaxlength != null && obj.value.length == objMaxlength && o_nextObj != null) {
+                var nextObjMaxlength = o_nextObj.getAttribute('maxlength') == null || o_nextObj.getAttribute('maxlength') == '' ? null : o_nextObj.getAttribute('maxlength');
+
+                if (nextObjMaxlength == null) {
+                    //若原先 textboxA 字元長度已飽狀態下輸入字元，而下一個目標 textboxB 有値且長度無限制，將輸入値插入 textboxB 的開頭
+                    if (o_nextObj.value != '') {
+                        o_nextObj.value = (obj.value.length == objMaxlength ? String.fromCharCode(keyCode) : '') + o_nextObj.value;
+                        position = 1;
+                        moveCursorPosition(p_nextObjId, 1);
+                    } else {
+                        moveCursorPosition(p_nextObjId, 0);
+                    }
+                } else {
+                    //若原先 textboxA 字元長度已飽狀態下輸入字元，而下一個目標 textboxB 有値但尚未飽和，將輸入値插入 textboxB 的開頭
+                    if (obj.value.length == 4 && o_nextObj.value.length != nextObjMaxlength) {
+                        moveCursorPosition(p_nextObjId, 0);
+                    } else if (o_nextObj.value.length == nextObjMaxlength) {
+                        moveCursorPosition(p_nextObjId, 0);
+                        o_nextObj.setSelectionRange(0, nextObjMaxlength);
+                    }
+                }
+            }
+        }
+        //move to Next (input "->"" Key)
+        else if (objMaxlength != null && obj.selectionEnd == objMaxlength && keyCode == 39 && o_nextObj != null) {
+            moveCursorPosition(p_nextObjId, 0);
+        }
+        //move to Previous (input BACK, "<-"" Key)
+        else if (obj.selectionStart == 0 && (keyCode == 37 || keyCode == 8 && o_prevObj != null)) {
+            moveCursorPosition(p_prevObjId, o_prevObj.value.length);
+        }
+    }
+    </script>
+    <style>
+    input {
+        border: 1px solid #CCC;
+        padding: 5px;
+    }
+    
+    input:focus {
+        border-color: #FC0;
+    }
+    
+    span#msg {
+        display: block;
+        padding: 3px 5px;
+        background: #CCC;
+        font-weight: bold;
+    }
+    </style>
+</head>
+
+<body>
+    <h3>Credit Card (Type 1)</h3>
+    <input type="text" id="text1" maxlength="4" onkeypress="return inputNumberOnly(event);" onkeyup="moveCreditCardTextbox(this, event, { nextObjId: 'text2'}); jq_ValidateCreditCard('#hiddenCCNO', ['text1', 'text2', 'text3', 'text4']);" /> -
+    <input type="text" id="text2" maxlength="4" onkeypress="return inputNumberOnly(event);" onkeyup="moveCreditCardTextbox(this, event, { nextObjId: 'text3', prevObjId:'text1'}); jq_ValidateCreditCard('hiddenCCNO', ['text1', 'text2', 'text3', 'text4']);" /> -
+    <input type="text" id="text3" maxlength="4" onkeypress="return inputNumberOnly(event);" onkeyup="moveCreditCardTextbox(this, event, { nextObjId: 'text4', prevObjId:'text2'}); jq_ValidateCreditCard('hiddenCCNO', ['text1', 'text2', 'text3', 'text4']);" /> -
+    <input type="text" id="text4" maxlength="4" onkeypress="return inputNumberOnly(event);" onkeyup="moveCreditCardTextbox(this, event, { prevObjId: 'text3'}); jq_ValidateCreditCard('hiddenCCNO', ['text1', 'text2', 'text3', 'text4']);" />
+    <input type="hidden" id="hiddenCCNO" name="hiddenCCNO" />
+    <br /> Sample codes:
+    <br /> 4000 0000 0000 0002
+    <br /> 4026 0000 0000 0002
+    <br /> 5018 0000 0009
+    <br /> 5100 0000 0000 0008
+    <br /> 6011 0000 0000 0004
+    <hr />
+    <h3>Credit Card (Type 2)</h3>
+    <input type="text" id="text_cc" maxlength="16" style="width: 200px;" onkeypress="return inputNumberOnly(event);" onkeyup="jq_ValidateCreditCard('text_cc');" />
+    <br />
+    <hr />
+    <span id="msg"></span>
+    <hr />
+    <h1>Number Only</h1>
+    <input type="text" , id="txtImgOnly" , onkeypress="return inputNumberOnly(event)" </input>
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>動態表格控制</title>
+    <script src="https://code.jquery.com/jquery-1.11.3.js" /></script>
+    <style type="text/css">
+    #soli_table th {
+        border: none;
+        border-bottom: 1px solid #666;
+    }
+    
+    #soli_table td {
+        border: none;
+        border-bottom: 1px solid #CCC;
+    }
+    
+    #soli_table input.hide {
+        display: none;
+    }
+    </style>
+    <script type="text/javascript">
+    function getSolicitorInfo() {
+        //alert('check');
+    }
+
+    //新增表格列
+    function addRow() {
+        var objTable = document.getElementById("soli_table");
+
+        //紀錄操作幾次 "新增列功能"
+        var rowIndex = parseInt(document.getElementById('soli_count').value) + 1;
+        document.getElementById('soli_count').value = rowIndex;
+
+        //新增一列
+        var tr = objTable.insertRow();
+        tr.id = rowIndex;
+
+        //新增欄位: THU-NID
+        var td = tr.insertCell();
+
+        var input_nid = document.createElement('input');
+        input_nid.type = 'text';
+        input_nid.id = 'soli_thunid_' + rowIndex;
+        input_nid.name = 'soli_thunid_' + rowIndex;
+        input_nid.maxlength = '12';
+        input_nid.value = '';
+        input_nid.onblur = function() {
+            getSolicitorInfo(this);
+        };
+        input_nid.style = 'width: 90px;'
+        td.appendChild(input_nid);
+
+        var input_sid = document.createElement('input');
+        input_sid.type = 'hidden';
+        input_sid.id = 'soli_sid_' + rowIndex;
+        input_sid.name = 'soli_sid_' + rowIndex;
+        input_sid.value = '';
+        td.appendChild(input_sid);
+
+        tr.appendChild(td);
+        input_nid.focus();
+
+        //新增欄位: 姓名
+        var td = tr.insertCell();
+        td.innerHTML = '<span id="soli_name_' + rowIndex + '"><span class="TxtNull">未設定</span></span>';
+        tr.appendChild(td);
+
+        //新增欄位: 單位
+        var td = tr.insertCell();
+        var select_unit = document.createElement('select');
+        var select_unit_opt = document.createElement('option');
+        select_unit.id = 'soli_unit_'+rowIndex;
+        select_unit.name = 'soli_unit_'+rowIndex;
+        select_unit.style = 'width: 160px;';
+        
+        select_unit_opt.value='';
+        select_unit_opt.text='未設定';
+        select_unit.appendChild(select_unit_opt);
+        td.appendChild(select_unit);
+        
+
+        //新增欄位: 勸募比例
+        var td = tr.insertCell();
+        var input_pp = document.createElement('input');
+        var current_proportion_total = 0;
+        for (var i = 1; i < rowIndex; i++) {
+
+            if (document.getElementById('soli_proportion_' + i) != null && !isNaN(document.getElementById('soli_proportion_' + i).value)) {
+                current_proportion_total += parseInt(document.getElementById('soli_proportion_' + i).value);
+            }
+        }
+        input_pp.id = 'soli_proportion_' + rowIndex;
+        input_pp.name = 'soli_proportion_' + rowIndex;
+        input_pp.maxlength = 8;
+        input_pp.type = 'number';
+        input_pp.min = '0';
+        input_pp.max = '100';
+        input_pp.step = '1';
+        input_pp.value = current_proportion_total >= 100 ? '0' : (100 - current_proportion_total);
+        input_pp.style = 'width: 50px;';
+        //input_pp.disabled  = true;
+        input_pp.onkeypress = function() {
+            return inputNumberOnly(event, '.');
+        };
+
+        td.appendChild(input_pp);
+        tr.appendChild(td);
+        $('#soli_proportion_' + rowIndex).after('%');
+
+        //新增欄位: Email
+        var td = tr.insertCell();
+        var input_email = document.createElement('input');
+        input_email.name = 'soli_email_' + rowIndex;
+        input_email.id = 'soli_email_' + rowIndex;
+        input_email.maxlength = '90';
+        input_email.value = '';
+        input_email.type = 'email';
+        td.appendChild(input_email);
+        tr.appendChild(td);
+
+        //新增欄位: 按鈕
+        var td = tr.insertCell();
+        var input_add = document.createElement('input');
+        input_add.type = 'button';
+        input_add.id = 'soli_add_' + rowIndex;
+        input_add.value = '新增';
+        input_add.onclick = function() {
+            addRow();
+        };
+        td.appendChild(input_add);
+
+        var input_del = document.createElement('input');
+        input_del.type = 'button';
+        input_del.id = 'soli_del_' + rowIndex;
+        input_del.value = '移除';
+        input_del.onclick = function() {
+            delRow(rowIndex);
+        };
+        td.appendChild(input_del);
+        tr.appendChild(td);
+
+        //若不止一列，顯示表格第一列的刪除按鈕
+        if (objTable.rows.length - 1 > 1) {
+            $('#soli_del_' + objTable.rows[1].id).removeClass('hide');
+        }
+    }
+
+    //移除表格列
+    function delRow(tr_id) {
+        var objTable = document.getElementById("soli_table");
+        objTable.deleteRow(document.getElementById('soli_sid_' + tr_id).parentNode.parentNode.rowIndex);
+
+        if (objTable.rows.length - 1 == 1) {
+            $('#soli_del_' + objTable.rows[1].id).addClass('hide');
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <table id="soli_table" class="Layout_Filter Header-Text-Right Text-Top Text-Left" style="width: 100%;">
+        <tbody>
+            <tr>
+                <th style="width: 100px;">THU_NID 帳號</th>
+                <th style="width: 80px;">姓名</th>
+                <th style="width: 110px;">單位</th>
+                <th style="width: 85px;">勸募比例</th>
+                <th>Email</th>
+                <th style="width: 120px;"></th>
+            </tr>
+            <tr id="1">
+                <td>
+                    <input id="soli_thunid_1" name="soli_thunid_1" maxlength="12" value="" onblur="getSolicitorInfo(this)" style="width: 90px;" type="text">
+                    <input id="soli_sid_1" name="soli_sid_1" value="0" type="hidden">
+                </td>
+                <td><span id="soli_name_1"><span class="TxtNull">未設定</span></span>
+                </td>
+                <td>
+                    <select id="soli_unit_1" name="soli_unit_1" style="width: 160px;">
+                        <option value="a1">單筆郵寄</option>
+                        <option value="a2">於年底彙整寄送</option>
+                    </select>
+                </td>
+                <td>
+                    <input id="soli_proportion_1" name="soli_proportion_1" onkeypress="return inputNumberOnly(event, '.');" maxlength="8" step="1" min="0" max="100" value="100" style="width: 50px;" type="number">%</td>
+                <td>
+                    <input id="soli_email_1" name="soli_email_1" maxlength="80" value="" type="email">
+                </td>
+                <td>
+                    <input type="button" id="soli_add_1" value="新增" onclick="addRow()" />
+                    <input type="button" id="soli_del_1" value="移除" onclick="delRow(1)" class="hide" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <input id="soli_count" value="1" type="hidden">
+</body>
+
+</html>
