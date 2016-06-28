@@ -38,7 +38,7 @@
 
     //1. 記錄欄位清除選定移除的項目
     //2. 將選定移除項目的顯示文字移除
-    //3. 移除的項目加回下拉選單
+    //3. 移除的項目，並加回下拉選單
     function RemoveFromList(index, ddlId, hiddenObjId, displayListId) {
 
         //*** 記錄欄位清除選定移除的項目 ***//
@@ -58,7 +58,7 @@
         var ddl_name = obj.text();
 
         // //取得插入索引值
-        // var opts = '';        
+        // var opts = ''; 
         // $(ddlId + ' option').each(function() {
         //     opts += opts == '' ? $(this).val() : ',' + $(this).val();
         // });
@@ -67,6 +67,16 @@
         // opt_array.sort();
         // var ddl_index = opt_array.indexOf(index);
 
+        //建立區隔項目
+        var opts = '';
+        $(ddlId + ' option').each(function() {
+            opts += opts == '' ? $(this).val() : ',' + $(this).val();
+        });
+        var opt_array = opts.split(',');
+        if(opt_array.indexOf('-') == -1){            
+            var ddl_index = $(ddlId + ' option').length - 1;
+            $(ddlId + ' option').last().after($('<option></option').val('-').text('---------------'));
+        }
 
         //將項目插回選單
         var ddl_index = $(ddlId + ' option').length - 1;
