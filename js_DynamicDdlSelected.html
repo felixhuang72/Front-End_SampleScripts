@@ -12,8 +12,8 @@
     function AddToList(ddlId, hiddenObjId, displayListId) {
 
         var index = $(ddlId).get(0).selectedIndex;
-        var select_text = $('#ddl option:selected').text();
-        var select_val = $('#ddl option:selected').val();
+        var select_text = $(ddlId+' option:selected').text();
+        var select_val = $(ddlId+' option:selected').val();
         if (index != 0 || select_val != '' || select_val != '-1') {
 
 
@@ -116,9 +116,7 @@
     </select>
     <input type="submit" value="+" onclick="AddToList('#ddl', '#hiddenSelectedVal', '#selected_lst_text')" />
     <br />
-    <span id="selected_lst_text">
-      <!-- <span class="06">aaa<a href="#" onclick="RemoveFromList(id)">移除</a></span> -->
-    </span>
+    <span id="selected_lst_text"></span>
     <input type="hidden" name="hiddenSelectedVal" id="hiddenSelectedVal" />
 </body>
 
