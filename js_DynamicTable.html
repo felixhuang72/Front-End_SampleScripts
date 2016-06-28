@@ -24,22 +24,17 @@
     function getSolicitorInfo() {
         //alert('check');
     }
-
     //新增表格列
     function addRow() {
         var objTable = document.getElementById("soli_table");
-
         //紀錄操作幾次 "新增列功能"
         var rowIndex = parseInt(document.getElementById('soli_count').value) + 1;
         document.getElementById('soli_count').value = rowIndex;
-
         //新增一列
         var tr = objTable.insertRow();
         tr.id = rowIndex;
-
         //新增欄位: THU-NID
         var td = tr.insertCell();
-
         var input_nid = document.createElement('input');
         input_nid.type = 'text';
         input_nid.id = 'soli_thunid_' + rowIndex;
@@ -51,22 +46,18 @@
         };
         input_nid.style = 'width: 90px;'
         td.appendChild(input_nid);
-
         var input_sid = document.createElement('input');
         input_sid.type = 'hidden';
         input_sid.id = 'soli_sid_' + rowIndex;
         input_sid.name = 'soli_sid_' + rowIndex;
         input_sid.value = '';
         td.appendChild(input_sid);
-
         tr.appendChild(td);
         input_nid.focus();
-
         //新增欄位: 姓名
         var td = tr.insertCell();
         td.innerHTML = '<span id="soli_name_' + rowIndex + '"><span class="TxtNull">未設定</span></span>';
         tr.appendChild(td);
-
         //新增欄位: 單位
         var td = tr.insertCell();
         var select_unit = document.createElement('select');
@@ -80,13 +71,11 @@
         select_unit.appendChild(select_unit_opt);
         td.appendChild(select_unit);
         
-
         //新增欄位: 勸募比例
         var td = tr.insertCell();
         var input_pp = document.createElement('input');
         var current_proportion_total = 0;
         for (var i = 1; i < rowIndex; i++) {
-
             if (document.getElementById('soli_proportion_' + i) != null && !isNaN(document.getElementById('soli_proportion_' + i).value)) {
                 current_proportion_total += parseInt(document.getElementById('soli_proportion_' + i).value);
             }
@@ -104,11 +93,9 @@
         input_pp.onkeypress = function() {
             return inputNumberOnly(event, '.');
         };
-
         td.appendChild(input_pp);
         tr.appendChild(td);
         $('#soli_proportion_' + rowIndex).after('%');
-
         //新增欄位: Email
         var td = tr.insertCell();
         var input_email = document.createElement('input');
@@ -119,7 +106,6 @@
         input_email.type = 'email';
         td.appendChild(input_email);
         tr.appendChild(td);
-
         //新增欄位: 按鈕
         var td = tr.insertCell();
         var input_add = document.createElement('input');
@@ -130,7 +116,6 @@
             addRow();
         };
         td.appendChild(input_add);
-
         var input_del = document.createElement('input');
         input_del.type = 'button';
         input_del.id = 'soli_del_' + rowIndex;
@@ -140,18 +125,15 @@
         };
         td.appendChild(input_del);
         tr.appendChild(td);
-
         //若不止一列，顯示表格第一列的刪除按鈕
         if (objTable.rows.length - 1 > 1) {
             $('#soli_del_' + objTable.rows[1].id).removeClass('hide');
         }
     }
-
     //移除表格列
     function delRow(tr_id) {
         var objTable = document.getElementById("soli_table");
         objTable.deleteRow(document.getElementById('soli_sid_' + tr_id).parentNode.parentNode.rowIndex);
-
         if (objTable.rows.length - 1 == 1) {
             $('#soli_del_' + objTable.rows[1].id).addClass('hide');
         }

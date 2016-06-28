@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>移除下拉選定項目</title>
+    <script src="https://code.jquery.com/jquery-1.11.3.js" /></script>
+    <script>
+    //1. 將選定的項目加到記錄欄位
+    //2. 將文字顯示於下拉選單下方
+    //3. 下拉選單移除選定的項目
+    function AddToList() {
+
+    }
+
+    //1. 記錄欄位清除選定移除的項目
+    //2. 將選定移除項目的顯示文字移除
+    //3. 移除的項目加回下拉選單 (需加至原先排序的位置)
+    function RemoveFromList() {
+
+    }
+    </script>
+</head>
+
+<body>
+    <select id="ddl" name="ddl">
+        <option selected="selected" value="-1">請選擇濃度</option>
+        <option value="5">1~5</option>
+        <option value="15">10~15</option>
+        <option value="20">15~20</option>
+        <option value="25">20~25</option>
+        <option value="30">25~30</option>
+        <option value="35">30~35</option>
+        <option value="40">35~40</option>
+        <option value="45">40~45</option>
+        <option value="50">45~50</option>
+        <option value="10">5~10</option>
+        <option value="55">50~55</option>
+        <option value="60">55~60</option>
+        <option value="65">60~65</option>
+        <option value="70">65~70</option>
+        <option value="75">70~75</option>
+        <option value="80">75~80</option>
+        <option value="85">80~85</option>
+        <option value="90">85~90</option>
+        <option value="95">90~95</option>
+        <option value="100">95(含)以上</option>
+    </select>
+    <input type="submit" value="+" onclick="AddToList()" />
+    <br />    
+    <span id="selected_lst_text"></span>
+    <input type="hidden" name="hiddenSelectedVal" />
+</body>
+
+</html>
