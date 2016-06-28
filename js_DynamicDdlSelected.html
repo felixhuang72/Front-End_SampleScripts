@@ -1,24 +1,47 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>移除下拉選定項目</title>
     <script src="https://code.jquery.com/jquery-1.11.3.js" /></script>
     <script>
+
     //1. 將選定的項目加到記錄欄位
     //2. 將文字顯示於下拉選單下方
     //3. 下拉選單移除選定的項目
-    function AddToList() {
+    function AddToList(ddlId, hiddenObjId, displayListId) {
 
+        var index = $(ddlId).get(0).selectedIndex;
+        if (index != 0) {
+            var select_text = $('#ddl option:selected').text();
+            var select_val = $('#ddl option:selected').val();
+
+            //將選定的項目加到記錄欄位 
+            $(hiddenObjId).val($(hiddenObjId).val() + ($(hiddenObjId).val() == '' ? select_val : ',' + select_val));
+            
+            //進行排序
+            // var array = $(hiddenObjId).val().split(',').sort();            
+            // $(hiddenObjId).val('');
+            // for(var i=0; i<array.length; i++){
+            //     $(hiddenObjId).val($(hiddenObjId).val() + ($(hiddenObjId).val() == '' ? array[i] : ',' + array[i]));
+            // }
+
+            //將文字顯示於下拉選單下方
+            var html = '<span class="' + select_val + '">' + select_text + ' <a href="#" onclick="RemoveFromList(' + select_val + ', \''+ddlId+'\', \''+hiddenObjId+'\', \''+displayListId+'\')">移除</a><br /></span>';
+            $(displayListId).append(html);
+
+            //下拉選單移除選定的項目
+            $(ddlId+' option:eq(' + index + ')').remove();
+        }
     }
 
     //1. 記錄欄位清除選定移除的項目
     //2. 將選定移除項目的顯示文字移除
     //3. 移除的項目加回下拉選單 (需加至原先排序的位置)
-    function RemoveFromList() {
-
+    function RemoveFromList(index, ddlId, hiddenObjId, displayListId) {
+        
     }
+
     </script>
 </head>
 
@@ -26,6 +49,7 @@
     <select id="ddl" name="ddl">
         <option selected="selected" value="-1">請選擇濃度</option>
         <option value="5">1~5</option>
+        <option value="10">5~10</option>
         <option value="15">10~15</option>
         <option value="20">15~20</option>
         <option value="25">20~25</option>
@@ -33,8 +57,7 @@
         <option value="35">30~35</option>
         <option value="40">35~40</option>
         <option value="45">40~45</option>
-        <option value="50">45~50</option>
-        <option value="10">5~10</option>
+        <option value="50">45~50</option>        
         <option value="55">50~55</option>
         <option value="60">55~60</option>
         <option value="65">60~65</option>
@@ -46,10 +69,12 @@
         <option value="95">90~95</option>
         <option value="100">95(含)以上</option>
     </select>
-    <input type="submit" value="+" onclick="AddToList()" />
-    <br />    
-    <span id="selected_lst_text"></span>
-    <input type="hidden" name="hiddenSelectedVal" />
+    <input type="submit" value="+" onclick="AddToList('#ddl', '#hiddenSelectedVal', '#selected_lst_text')" />
+    <br />
+    <span id="selected_lst_text">
+      <!-- <span class="06">aaa<a href="#" onclick="RemoveFromList(id)">移除</a></span> -->
+    </span>
+    <input type="hidden" name="hiddenSelectedVal" id="hiddenSelectedVal" />
 </body>
 
 </html>
