@@ -1,24 +1,25 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>移除下拉選定項目</title>
     <script src="https://code.jquery.com/jquery-1.11.3.js" /></script>
     <script>
-
     //1. 將選定的項目加到記錄欄位
     //2. 將文字顯示於下拉選單下方
     //3. 下拉選單移除選定的項目
     function AddToList(ddlId, hiddenObjId, displayListId) {
 
         var index = $(ddlId).get(0).selectedIndex;
-        if (index != 0) {
-            var select_text = $('#ddl option:selected').text();
-            var select_val = $('#ddl option:selected').val();
+        var select_text = $('#ddl option:selected').text();
+        var select_val = $('#ddl option:selected').val();
+        if (index != 0 || select_val != '' || select_val != '-1') {
+
 
             //將選定的項目加到記錄欄位 
             $(hiddenObjId).val($(hiddenObjId).val() + ($(hiddenObjId).val() == '' ? select_val : ',' + select_val));
-            
+
             //進行排序
             // var array = $(hiddenObjId).val().split(',').sort();            
             // $(hiddenObjId).val('');
@@ -27,21 +28,55 @@
             // }
 
             //將文字顯示於下拉選單下方
-            var html = '<span class="' + select_val + '">' + select_text + ' <a href="#" onclick="RemoveFromList(' + select_val + ', \''+ddlId+'\', \''+hiddenObjId+'\', \''+displayListId+'\')">移除</a><br /></span>';
+            var html = '<span class="' + select_val + '">' + select_text + ' <a href="#" onclick="RemoveFromList(\'' + select_val + '\', \'' + ddlId + '\', \'' + hiddenObjId + '\', \'' + displayListId + '\')">移除</a><br /></span>';
             $(displayListId).append(html);
 
             //下拉選單移除選定的項目
-            $(ddlId+' option:eq(' + index + ')').remove();
+            $(ddlId + ' option:eq(' + index + ')').remove();
         }
     }
 
     //1. 記錄欄位清除選定移除的項目
     //2. 將選定移除項目的顯示文字移除
-    //3. 移除的項目加回下拉選單 (需加至原先排序的位置)
+    //3. 移除的項目加回下拉選單
     function RemoveFromList(index, ddlId, hiddenObjId, displayListId) {
-        
-    }
 
+        //*** 記錄欄位清除選定移除的項目 ***//
+        var array = $(hiddenObjId).val().split(',');
+        if (array.indexOf(index) > -1) {
+            array.splice(array.indexOf(index), 1);
+        }
+        $(hiddenObjId).val('');
+        for (var i = 0; i < array.length; i++) {
+            $(hiddenObjId).val($(hiddenObjId).val() + ($(hiddenObjId).val() == '' ? array[i] : ',' + array[i]));
+        }
+
+        //*** 移除的項目加回下拉選單 ***//
+        //取得名稱
+        var obj = $(displayListId).find('span.' + index);
+        obj.find('a').remove();
+        var ddl_name = obj.text();
+
+        // //取得插入索引值
+        // var opts = '';        
+        // $(ddlId + ' option').each(function() {
+        //     opts += opts == '' ? $(this).val() : ',' + $(this).val();
+        // });
+        // var opt_array = opts.split(',');
+        // opt_array.push(index);
+        // opt_array.sort();
+        // var ddl_index = opt_array.indexOf(index);
+
+
+        //將項目插回選單
+        var ddl_index = $(ddlId + ' option').length - 1;
+        $(ddlId + ' option').eq(ddl_index).after($('<option></option').val(index).text(ddl_name));
+
+
+        //*** 將選定移除項目的顯示文字移除 ***//
+        $(selected_lst_text).find('span.' + index).remove();
+
+    }
     </script>
 </head>
 
@@ -57,7 +92,7 @@
         <option value="35">30~35</option>
         <option value="40">35~40</option>
         <option value="45">40~45</option>
-        <option value="50">45~50</option>        
+        <option value="50">45~50</option>
         <option value="55">50~55</option>
         <option value="60">55~60</option>
         <option value="65">60~65</option>
