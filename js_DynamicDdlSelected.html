@@ -14,7 +14,7 @@
         var index = $(ddlId).get(0).selectedIndex;
         var select_text = $(ddlId+' option:selected').text();
         var select_val = $(ddlId+' option:selected').val();
-        if (index != 0 || select_val != '' || select_val != '-1') {
+        if (index != 0 && select_val != '' && select_val != '-1' && select_val != '-') {
 
 
             //將選定的項目加到記錄欄位 
